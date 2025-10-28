@@ -53,6 +53,8 @@ class IterativeMinMaxLinearEquationSolver : public StandardMinMaxLinearEquationS
                                                 std::vector<ValueType> const& b) const;
     bool solveEquationsGuessingValueIteration(Environment const& env, OptimizationDirection dir, std::vector<SolutionType>& x,
                                               std::vector<ValueType> const& b) const;
+    bool solveEquationsAdaptiveBayesianOptimizationValueIteration(Environment const& env, OptimizationDirection dir, 
+                                                                  std::vector<SolutionType>& x, std::vector<ValueType> const& b) const;
     bool solveEquationsIntervalIteration(Environment const& env, OptimizationDirection dir, std::vector<SolutionType>& x,
                                          std::vector<ValueType> const& b) const;
     bool solveEquationsSoundValueIteration(Environment const& env, OptimizationDirection dir, std::vector<SolutionType>& x,

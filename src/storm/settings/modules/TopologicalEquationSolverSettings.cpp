@@ -107,6 +107,8 @@ storm::solver::MinMaxMethod TopologicalEquationSolverSettings::getUnderlyingMinM
         return storm::solver::MinMaxMethod::LinearProgramming;
     } else if (minMaxEquationSolvingTechnique == "ratsearch" || minMaxEquationSolvingTechnique == "rs") {
         return storm::solver::MinMaxMethod::RationalSearch;
+    } else if (minMaxEquationSolvingTechnique == "adaptive-bayesian-optimization-value-iteration" || minMaxEquationSolvingTechnique == "abovi") {
+        return storm::solver::MinMaxMethod::AdaptiveBayesianOptimizationValueIteration;
     } else if (minMaxEquationSolvingTechnique == "interval-iteration" || minMaxEquationSolvingTechnique == "ii") {
         return storm::solver::MinMaxMethod::IntervalIteration;
     } else if (minMaxEquationSolvingTechnique == "sound-value-iteration" || minMaxEquationSolvingTechnique == "svi") {

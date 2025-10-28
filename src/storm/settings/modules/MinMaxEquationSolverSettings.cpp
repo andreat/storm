@@ -29,6 +29,7 @@ MinMaxEquationSolverSettings::MinMaxEquationSolverSettings() : ModuleSettings(mo
                                                         "lp",          "linear-programming",
                                                         "rs",          "ratsearch",
                                                         "ii",          "interval-iteration",
+                                                        "abovi",       "adaptive-bayesian-optimization-value-iteration",
                                                         "svi",         "sound-value-iteration",
                                                         "ovi",         "optimistic-value-iteration",
                                                         "gvi",         "guessing-value-iteration",
@@ -109,6 +110,8 @@ storm::solver::MinMaxMethod MinMaxEquationSolverSettings::getMinMaxEquationSolvi
         return storm::solver::MinMaxMethod::LinearProgramming;
     } else if (minMaxEquationSolvingTechnique == "ratsearch" || minMaxEquationSolvingTechnique == "rs") {
         return storm::solver::MinMaxMethod::RationalSearch;
+    } else if (minMaxEquationSolvingTechnique == "adaptive-bayesian-optimization-value-iteration" || minMaxEquationSolvingTechnique == "abovi") {
+        return storm::solver::MinMaxMethod::AdaptiveBayesianOptimizationValueIteration;
     } else if (minMaxEquationSolvingTechnique == "interval-iteration" || minMaxEquationSolvingTechnique == "ii") {
         return storm::solver::MinMaxMethod::IntervalIteration;
     } else if (minMaxEquationSolvingTechnique == "sound-value-iteration" || minMaxEquationSolvingTechnique == "svi") {

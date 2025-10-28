@@ -105,6 +105,9 @@ bool IterativeMinMaxLinearEquationSolver<ValueType, SolutionType>::internalSolve
         case MinMaxMethod::RationalSearch:
             result = solveEquationsRationalSearch(env, dir, x, b);
             break;
+        case MinMaxMethod::AdaptiveBayesianOptimizationValueIteration: 
+            result = solveEquationsAdaptiveBayesianOptimizationValueIteration(env, dir, x, b);
+            break;
         case MinMaxMethod::IntervalIteration:
             result = solveEquationsIntervalIteration(env, dir, x, b);
             break;
@@ -490,6 +493,9 @@ MinMaxLinearEquationSolverRequirements IterativeMinMaxLinearEquationSolver<Value
             requirements.requireUniqueSolution();
         }
         requirements.requireBounds();
+    } else if (method == MinMaxMethod::AdaptiveBayesianOptimizationValueIteration) {
+        // ABODI: what requirements do we need?
+        requirements.requireBounds();
     } else if (method == MinMaxMethod::IntervalIteration) {
         // Interval iteration requires a unique solution and lower+upper bounds
         if (!this->hasUniqueSolution()) {
@@ -761,6 +767,109 @@ bool IterativeMinMaxLinearEquationSolver<ValueType, SolutionType>::solveEquation
 template<typename ValueType, typename SolutionType>
 void preserveOldRelevantValues(std::vector<ValueType> const& allValues, storm::storage::BitVector const& relevantValues, std::vector<ValueType>& oldValues) {
     storm::utility::vector::selectVectorValues(oldValues, relevantValues, allValues);
+}
+
+template<typename ValueType, typename SolutionType>
+bool IterativeMinMaxLinearEquationSolver<ValueType, SolutionType>::solveEquationsAdaptiveBayesianOptimizationValueIteration(
+            Environment const& env, OptimizationDirection dir, std::vector<SolutionType>& x, std::vector<ValueType> const& b) const {
+
+    setUpViOperator();
+    // By default, we can not provide any guarantee
+    SolverGuarantee guarantee = SolverGuarantee::None;
+
+    if (this->hasInitialScheduler()) {
+        if (!auxiliaryRowGroupVector) {
+            auxiliaryRowGroupVector = std::make_unique<std::vector<ValueType>>(this->A->getRowGroupCount());
+        }
+        // Solve the equation system induced by the initial scheduler.
+        std::unique_ptr<storm::solver::LinearEquationSolver<SolutionType>> linEqSolver;
+        // The linear equation solver should be at least as precise as this solver
+        std::unique_ptr<storm::Environment> environmentOfSolverStorage;
+        auto precOfSolver = env.solver().getPrecisionOfLinearEquationSolver(env.solver().getLinearEquationSolverType());
+        if (!storm::NumberTraits<ValueType>::IsExact) {
+            bool changePrecision = precOfSolver.first && precOfSolver.first.get() > env.solver().minMax().getPrecision();
+            bool changeRelative = precOfSolver.second && !precOfSolver.second.get() && env.solver().minMax().getRelativeTerminationCriterion();
+            if (changePrecision || changeRelative) {
+                environmentOfSolverStorage = std::make_unique<storm::Environment>(env);
+                boost::optional<storm::RationalNumber> newPrecision;
+                boost::optional<bool> newRelative;
+                if (changePrecision) {
+                    newPrecision = env.solver().minMax().getPrecision();
+                }
+                if (changeRelative) {
+                    newRelative = true;
+                }
+                environmentOfSolverStorage->solver().setLinearEquationSolverPrecision(newPrecision, newRelative);
+            }
+        }
+        storm::Environment const& environmentOfSolver = environmentOfSolverStorage ? *environmentOfSolverStorage : env;
+
+        solveInducedEquationSystem(environmentOfSolver, linEqSolver, this->getInitialScheduler(), x, *auxiliaryRowGroupVector, b, dir);
+        // If we were given an initial scheduler and are maximizing (minimizing), our current solution becomes
+        // always less-or-equal (greater-or-equal) than the actual solution.
+        guarantee = maximize(dir) ? SolverGuarantee::LessOrEqual : SolverGuarantee::GreaterOrEqual;
+    } else if (!this->hasUniqueSolution()) {
+        if (maximize(dir)) {
+            this->createLowerBoundsVector(x);
+            guarantee = SolverGuarantee::LessOrEqual;
+        } else {
+            this->createUpperBoundsVector(x);
+            guarantee = SolverGuarantee::GreaterOrEqual;
+        }
+    } else if (this->hasCustomTerminationCondition()) {
+        if (this->getTerminationCondition().requiresGuarantee(SolverGuarantee::LessOrEqual) && this->hasLowerBound()) {
+            this->createLowerBoundsVector(x);
+            guarantee = SolverGuarantee::LessOrEqual;
+        } else if (this->getTerminationCondition().requiresGuarantee(SolverGuarantee::GreaterOrEqual) && this->hasUpperBound()) {
+            this->createUpperBoundsVector(x);
+            guarantee = SolverGuarantee::GreaterOrEqual;
+        }
+    }
+
+    uint64_t numIterations{0};
+    auto viCallback = [&](SolverStatus const& current) {
+        this->showProgressIterative(numIterations);
+        return this->updateStatus(current, x, guarantee, numIterations, env.solver().minMax().getMaximalNumberOfIterations());
+    };
+    this->startMeasureProgress();
+    // This code duplication is necessary because the helper class is different for the two cases.
+    if (this->A->hasTrivialRowGrouping()) {
+        storm::solver::helper::ValueIterationHelper<ValueType, true, SolutionType> viHelper(viOperatorTriv);
+
+        auto status = viHelper.VI(x, b, numIterations, env.solver().minMax().getRelativeTerminationCriterion(),
+                                  storm::utility::convertNumber<SolutionType>(env.solver().minMax().getPrecision()), dir, viCallback,
+                                  env.solver().minMax().getMultiplicationStyle(), this->isUncertaintyRobust());
+        this->reportStatus(status, numIterations);
+
+        // If requested, we store the scheduler for retrieval.
+        if (this->isTrackSchedulerSet()) {
+            this->extractScheduler(x, b, dir, this->isUncertaintyRobust());
+        }
+
+        if (!this->isCachingEnabled()) {
+            clearCache();
+        }
+
+        return status == SolverStatus::Converged || status == SolverStatus::TerminatedEarly;
+    } else {
+        storm::solver::helper::ValueIterationHelper<ValueType, false, SolutionType> viHelper(viOperatorNontriv);
+
+        auto status = viHelper.VI(x, b, numIterations, env.solver().minMax().getRelativeTerminationCriterion(),
+                                  storm::utility::convertNumber<SolutionType>(env.solver().minMax().getPrecision()), dir, viCallback,
+                                  env.solver().minMax().getMultiplicationStyle(), this->isUncertaintyRobust());
+        this->reportStatus(status, numIterations);
+
+        // If requested, we store the scheduler for retrieval.
+        if (this->isTrackSchedulerSet()) {
+            this->extractScheduler(x, b, dir, this->isUncertaintyRobust());
+        }
+
+        if (!this->isCachingEnabled()) {
+            clearCache();
+        }
+
+        return status == SolverStatus::Converged || status == SolverStatus::TerminatedEarly;
+    }
 }
 
 /*!

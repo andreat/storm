@@ -63,6 +63,8 @@ void NativeLinearEquationSolver<ValueType>::setUpViOperator() const {
 template<typename ValueType>
 bool NativeLinearEquationSolver<ValueType>::solveEquationsAdaptiveBayesianOptimizationValueIteration(Environment const& env, std::vector<ValueType>& x, std::vector<ValueType> const& b) const {
 
+    STORM_LOG_WARN("ABO solver here!!!");
+
     if (!this->cachedRowVector) {
         this->cachedRowVector = std::make_unique<std::vector<ValueType>>(getMatrixRowCount());
     }
@@ -180,6 +182,8 @@ NativeLinearEquationSolver<ValueType>::JacobiDecomposition::JacobiDecomposition(
 template<typename ValueType>
 bool NativeLinearEquationSolver<ValueType>::solveEquationsJacobi(Environment const& env, std::vector<ValueType>& x, std::vector<ValueType> const& b) const {
     STORM_LOG_INFO("Solving linear equation system (" << x.size() << " rows) with NativeLinearEquationSolver (Jacobi)");
+
+    STORM_LOG_WARN("JACOBI solver here!!!");
 
     if (!this->cachedRowVector) {
         this->cachedRowVector = std::make_unique<std::vector<ValueType>>(getMatrixRowCount());
@@ -714,6 +718,8 @@ bool NativeLinearEquationSolver<ValueType>::internalSolveEquations(Environment c
             return this->solveEquationsWalkerChae(env, x, b);
         case NativeLinearEquationSolverMethod::Power:
             return this->solveEquationsPower(env, x, b);
+        case NativeLinearEquationSolverMethod::AdaptiveBayesianOptimizationValueIteration:
+            return this->solveEquationsAdaptiveBayesianOptimizationValueIteration(env, x, b);
         case NativeLinearEquationSolverMethod::SoundValueIteration:
             return this->solveEquationsSoundValueIteration(env, x, b);
         case NativeLinearEquationSolverMethod::OptimisticValueIteration:

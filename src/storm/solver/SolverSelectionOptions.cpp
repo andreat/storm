@@ -14,6 +14,8 @@ std::string toString(MinMaxMethod m) {
             return "topological";
         case MinMaxMethod::RationalSearch:
             return "ratsearch";
+        case MinMaxMethod::AdaptiveBayesianOptimizationValueIteration:
+            return "adaptivebayesianoptimizationvalueiteration";
         case MinMaxMethod::IntervalIteration:
             return "intervaliteration";
         case MinMaxMethod::SoundValueIteration:
