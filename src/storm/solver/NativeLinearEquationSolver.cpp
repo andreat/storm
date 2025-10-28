@@ -61,6 +61,67 @@ void NativeLinearEquationSolver<ValueType>::setUpViOperator() const {
 }
 
 template<typename ValueType>
+bool NativeLinearEquationSolver<ValueType>::solveEquationsAdaptiveBayesianOptimizationValueIteration(Environment const& env, std::vector<ValueType>& x, std::vector<ValueType> const& b) const {
+
+    if (!this->cachedRowVector) {
+        this->cachedRowVector = std::make_unique<std::vector<ValueType>>(getMatrixRowCount());
+    }
+
+    // Get a Jacobi decomposition of the matrix A.
+    if (!jacobiDecomposition) {
+        jacobiDecomposition = std::make_unique<JacobiDecomposition>(env, *A);
+    }
+
+    ValueType precision = storm::utility::convertNumber<ValueType>(env.solver().native().getPrecision());
+    uint64_t maxIter = env.solver().native().getMaximalNumberOfIterations();
+    bool relative = env.solver().native().getRelativeTerminationCriterion();
+
+    std::vector<ValueType>* currentX = &x;
+    std::vector<ValueType>* nextX = this->cachedRowVector.get();
+
+    // Set up additional environment variables.
+    uint_fast64_t iterations = 0;
+    SolverStatus status = SolverStatus::InProgress;
+
+    this->startMeasureProgress();
+    while (status == SolverStatus::InProgress && iterations < maxIter) {
+        // Compute D^-1 * (b - LU * x) and store result in nextX.
+        jacobiDecomposition->multiplier->multiply(env, *currentX, nullptr, *nextX);
+        storm::utility::vector::subtractVectors(b, *nextX, *nextX);
+        storm::utility::vector::multiplyVectorsPointwise(jacobiDecomposition->DVector, *nextX, *nextX);
+
+        // Now check if the process already converged within our precision.
+        if (storm::utility::vector::equalModuloPrecision<ValueType>(*currentX, *nextX, precision, relative)) {
+            status = SolverStatus::Converged;
+        }
+        // Swap the two pointers as a preparation for the next iteration.
+        std::swap(nextX, currentX);
+
+        // Potentially show progress.
+        this->showProgressIterative(iterations);
+
+        // Increase iteration count so we can abort if convergence is too slow.
+        ++iterations;
+
+        status = this->updateStatus(status, *currentX, SolverGuarantee::None, iterations, maxIter);
+    }
+
+    // If the last iteration did not write to the original x we have to swap the contents, because the
+    // output has to be written to the input parameter x.
+    if (currentX == this->cachedRowVector.get()) {
+        std::swap(x, *currentX);
+    }
+
+    if (!this->isCachingEnabled()) {
+        clearCache();
+    }
+
+    this->reportStatus(status, iterations);
+
+    return status == SolverStatus::Converged;
+}
+
+template<typename ValueType>
 bool NativeLinearEquationSolver<ValueType>::solveEquationsSOR(Environment const& env, std::vector<ValueType>& x, std::vector<ValueType> const& b,
                                                               ValueType const& omega) const {
     STORM_LOG_INFO("Solving linear equation system (" << x.size() << " rows) with NativeLinearEquationSolver (Gauss-Seidel, SOR omega = " << omega << ")");

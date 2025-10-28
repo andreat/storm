@@ -130,6 +130,8 @@ std::string toString(NativeLinearEquationSolverMethod t) {
             return "WalkerChae";
         case NativeLinearEquationSolverMethod::Power:
             return "Power";
+        case NativeLinearEquationSolverMethod::AdaptiveBayesianOptimizationValueIteration:
+            return "AdaptiveBayesianOptimizationValueIteration";
         case NativeLinearEquationSolverMethod::SoundValueIteration:
             return "SoundValueIteration";
         case NativeLinearEquationSolverMethod::OptimisticValueIteration:

@@ -28,6 +28,7 @@ const std::string NativeEquationSolverSettings::intervalIterationSymmetricUpdate
 NativeEquationSolverSettings::NativeEquationSolverSettings() : ModuleSettings(moduleName) {
     std::vector<std::string> methods = {"jacobi", "gaussseidel",
                                         "sor",    "walkerchae",
+                                        "abovi",  "adaptive-bayesian-optimization-value-iteration"
                                         "power",  "sound-value-iteration",
                                         "svi",    "optimistic-value-iteration",
                                         "ovi",    "guessing-value-iteration",
@@ -107,6 +108,8 @@ storm::solver::NativeLinearEquationSolverMethod NativeEquationSolverSettings::ge
         return storm::solver::NativeLinearEquationSolverMethod::WalkerChae;
     } else if (linearEquationSystemTechniqueAsString == "power") {
         return storm::solver::NativeLinearEquationSolverMethod::Power;
+    } else if (linearEquationSystemTechniqueAsString == "adaptive-bayesian-optimization-value-iteration" || linearEquationSystemTechniqueAsString == "abovi") {
+        return storm::solver::NativeLinearEquationSolverMethod::AdaptiveBayesianOptimizationValueIteration;
     } else if (linearEquationSystemTechniqueAsString == "sound-value-iteration" || linearEquationSystemTechniqueAsString == "svi") {
         return storm::solver::NativeLinearEquationSolverMethod::SoundValueIteration;
     } else if (linearEquationSystemTechniqueAsString == "optimistic-value-iteration" || linearEquationSystemTechniqueAsString == "ovi") {

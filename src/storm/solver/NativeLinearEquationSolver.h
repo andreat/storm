@@ -68,6 +68,7 @@ class NativeLinearEquationSolver : public LinearEquationSolver<ValueType> {
     virtual bool solveEquationsJacobi(storm::Environment const& env, std::vector<ValueType>& x, std::vector<ValueType> const& b) const;
     virtual bool solveEquationsWalkerChae(storm::Environment const& env, std::vector<ValueType>& x, std::vector<ValueType> const& b) const;
     virtual bool solveEquationsPower(storm::Environment const& env, std::vector<ValueType>& x, std::vector<ValueType> const& b) const;
+    virtual bool solveEquationsAdaptiveBayesianOptimizationValueIteration(storm::Environment const& env, std::vector<ValueType>& x, std::vector<ValueType> const& b) const;
     virtual bool solveEquationsSoundValueIteration(storm::Environment const& env, std::vector<ValueType>& x, std::vector<ValueType> const& b) const;
     virtual bool solveEquationsOptimisticValueIteration(storm::Environment const& env, std::vector<ValueType>& x, std::vector<ValueType> const& b) const;
     virtual bool solveEquationsGuessingValueIteration(storm::Environment const& env, std::vector<ValueType>& x, std::vector<ValueType> const& b) const;

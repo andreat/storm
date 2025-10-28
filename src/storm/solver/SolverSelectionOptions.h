@@ -16,7 +16,8 @@ ExtendEnumsWithSelectionField(MinMaxMethod, ValueIteration, PolicyIteration, Lin
                         ExtendEnumsWithSelectionField(SmtSolverType, Z3, Mathsat)
 
                             ExtendEnumsWithSelectionField(NativeLinearEquationSolverMethod, Jacobi, GaussSeidel, SOR, WalkerChae, Power, SoundValueIteration,
-                                                          OptimisticValueIteration, GuessingValueIteration, IntervalIteration, RationalSearch)
+                                                          OptimisticValueIteration, GuessingValueIteration, IntervalIteration, RationalSearch,
+                                                          AdaptiveBayesianOptimizationValueIteration)
                                 ExtendEnumsWithSelectionField(GmmxxLinearEquationSolverMethod, Bicgstab, Qmr, Gmres)
                                     ExtendEnumsWithSelectionField(GmmxxLinearEquationSolverPreconditioner, Ilu, Diagonal, None)
                                         ExtendEnumsWithSelectionField(EigenLinearEquationSolverMethod, SparseLU, Bicgstab, DGmres, Gmres)
