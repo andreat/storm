@@ -85,20 +85,36 @@ void NativeSolverEnvironment::setSorOmega(storm::RationalNumber const& value) {
     sorOmega = value;
 }
 
-storm::RationalNumber const& NativeSolverEnvironment::getEffectiveTolerance() const {
-    return effectiveTolerance;
-}
-
-void NativeSolverEnvironment::setEffectiveTolerance(storm::RationalNumber const& value) {
-    effectiveTolerance = value;
-}
-
 bool NativeSolverEnvironment::isSymmetricUpdatesSet() const {
     return symmetricUpdates;
 }
 
 void NativeSolverEnvironment::setSymmetricUpdates(bool value) {
     symmetricUpdates = value;
+}
+
+storm::RationalNumber const& NativeSolverEnvironment::getABOVIEffectiveTolerance() const {
+    return aboviEffectiveTolerance;
+}
+
+void NativeSolverEnvironment::setABOVIEffectiveTolerance(storm::RationalNumber const& value) {
+    aboviEffectiveTolerance = value;
+}
+
+storm::RationalNumber const& NativeSolverEnvironment::getABOVISpectralUpperBound() const {
+    return aboviSpectralUpperBound;
+}
+
+void NativeSolverEnvironment::setABOVISpectralUpperBound(storm::RationalNumber const& value) {
+    aboviSpectralUpperBound = value;
+}
+
+storm::RationalNumber const& NativeSolverEnvironment::getABOVISpectralLowerBound() const {
+    return aboviSpectralLowerBound;
+}
+
+void NativeSolverEnvironment::setABOVISpectralLowerBound(storm::RationalNumber const& value) {
+    aboviSpectralLowerBound = value;
 }
 
 }  // namespace storm

@@ -26,10 +26,14 @@ class NativeSolverEnvironment {
     void setPowerMethodMultiplicationStyle(storm::solver::MultiplicationStyle value);
     storm::RationalNumber const& getSorOmega() const;
     void setSorOmega(storm::RationalNumber const& value);
-    storm::RationalNumber const& getEffectiveTolerance() const;
-    void setEffectiveTolerance(storm::RationalNumber const& value);
     bool isSymmetricUpdatesSet() const;
     void setSymmetricUpdates(bool value);
+    storm::RationalNumber const& getABOVIEffectiveTolerance() const;
+    void setABOVIEffectiveTolerance(storm::RationalNumber const& value);
+    storm::RationalNumber const& getABOVISpectralUpperBound() const;
+    void setABOVISpectralUpperBound(storm::RationalNumber const& value);
+    storm::RationalNumber const& getABOVISpectralLowerBound() const;
+    void setABOVISpectralLowerBound(storm::RationalNumber const& value);
 
    private:
     storm::solver::NativeLinearEquationSolverMethod method;
@@ -40,6 +44,8 @@ class NativeSolverEnvironment {
     storm::solver::MultiplicationStyle powerMethodMultiplicationStyle;
     storm::RationalNumber sorOmega;
     bool symmetricUpdates;
-    storm::RationalNumber effectiveTolerance;
+    storm::RationalNumber aboviEffectiveTolerance;
+    storm::RationalNumber aboviSpectralUpperBound;
+    storm::RationalNumber aboviSpectralLowerBound;
 };
 }  // namespace storm

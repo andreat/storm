@@ -108,6 +108,27 @@ class MinMaxEquationSolverSettings : public ModuleSettings {
      */
     bool getLpUseEqualityForTrivialActions() const;
 
+    /*!
+     * Retrieves the value of the effective tolerance to be used for the adaptive Bayesian optimization value iteration method.
+     *
+     * @return The value of the effective tolerance to be used.
+     */
+    double getABOVIEffectiveTolerance() const;
+
+    /*!
+     * Retrieves the value of the spectral upper bound to be used for the adaptive Bayesian optimization value iteration method.
+     *
+     * @return The value of the spectral upper bound to be used.
+     */
+    double getABOVISpectralUpperBound() const;
+
+    /*!
+     * Retrieves the value of the spectral lower bound to be used for the adaptive Bayesian optimization value iteration method.
+     *
+     * @return The value of the spectral lower bound to be used.
+     */
+    double getABOVISpectralLowerBound() const;
+
     // The name of the module.
     static const std::string moduleName;
 };

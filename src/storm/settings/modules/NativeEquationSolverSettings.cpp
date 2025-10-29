@@ -18,13 +18,18 @@ namespace modules {
 const std::string NativeEquationSolverSettings::moduleName = "native";
 const std::string NativeEquationSolverSettings::techniqueOptionName = "method";
 const std::string NativeEquationSolverSettings::omegaOptionName = "soromega";
-const std::string NativeEquationSolverSettings::effectiveToleranceOptionName = "effective-tolerance";
 const std::string NativeEquationSolverSettings::maximalIterationsOptionName = "maxiter";
 const std::string NativeEquationSolverSettings::maximalIterationsOptionShortName = "i";
 const std::string NativeEquationSolverSettings::precisionOptionName = "precision";
 const std::string NativeEquationSolverSettings::absoluteOptionName = "absolute";
 const std::string NativeEquationSolverSettings::powerMethodMultiplicationStyleOptionName = "powmult";
 const std::string NativeEquationSolverSettings::intervalIterationSymmetricUpdatesOptionName = "symmetricupdates";
+const std::string NativeEquationSolverSettings::aboviEffectiveToleranceOptionName = "abovi-effective-tolerance";
+const std::string NativeEquationSolverSettings::aboviEffectiveToleranceOptionShortName = "aet";
+const std::string NativeEquationSolverSettings::aboviSpectralUpperBoundOptionName = "abovi-spectral-upperbound";
+const std::string NativeEquationSolverSettings::aboviSpectralUpperBoundOptionShortName = "asub";
+const std::string NativeEquationSolverSettings::aboviSpectralLowerBoundOptionName = "abovi-spectral-lowerbound";
+const std::string NativeEquationSolverSettings::aboviSpectralLowerBoundOptionShortName = "aslu";
 
 NativeEquationSolverSettings::NativeEquationSolverSettings() : ModuleSettings(moduleName) {
     std::vector<std::string> methods = {"jacobi", "gaussseidel",
@@ -67,15 +72,6 @@ NativeEquationSolverSettings::NativeEquationSolverSettings() : ModuleSettings(mo
                                          .build())
                         .build());
 
-    this->addOption(storm::settings::OptionBuilder(moduleName, effectiveToleranceOptionName, false, 
-                                                   "The effective tolerance used in the adaptive Bayesian optimization value iteration.")
-                        .setIsAdvanced()
-                        .addArgument(storm::settings::ArgumentBuilder::createDoubleArgument("value", "The effective tolerance to use.")
-                                         .setDefaultValueDouble(1e-06)
-                                         .addValidatorDouble(ArgumentValidatorFactory::createDoubleRangeValidatorExcluding(0.0, 1.0))
-                                         .build())
-                        .build());
-
     this->addOption(storm::settings::OptionBuilder(moduleName, absoluteOptionName, false,
                                                    "Sets whether the relative or the absolute error is considered for detecting convergence.")
                         .setIsAdvanced()
@@ -94,6 +90,36 @@ NativeEquationSolverSettings::NativeEquationSolverSettings() : ModuleSettings(mo
     this->addOption(storm::settings::OptionBuilder(moduleName, intervalIterationSymmetricUpdatesOptionName, false,
                                                    "If set, interval iteration performs an update on both, lower and upper bound in each iteration")
                         .setIsAdvanced()
+                        .build());
+
+    this->addOption(storm::settings::OptionBuilder(moduleName, aboviEffectiveToleranceOptionName, false, 
+                                                   "The effective tolerance used in the adaptive Bayesian optimization value iteration.")
+                        .setShortName(aboviEffectiveToleranceOptionShortName)
+                        .setIsAdvanced()
+                        .addArgument(storm::settings::ArgumentBuilder::createDoubleArgument("value", "The effective tolerance to use.")
+                                         .setDefaultValueDouble(1e-06)
+                                         .addValidatorDouble(ArgumentValidatorFactory::createDoubleRangeValidatorExcluding(0.0, 1.0))
+                                         .build())
+                        .build());
+
+    this->addOption(storm::settings::OptionBuilder(moduleName, aboviSpectralUpperBoundOptionName, false, 
+                                                   "The spectral upper bound used in the adaptive Bayesian optimization value iteration.")
+                        .setShortName(aboviSpectralUpperBoundOptionShortName)
+                        .setIsAdvanced()
+                        .addArgument(storm::settings::ArgumentBuilder::createDoubleArgument("value", "The spectral upper bound to use.")
+                                         .setDefaultValueDouble(1.0)
+                                         .addValidatorDouble(ArgumentValidatorFactory::createDoubleGreaterValidator(0.0))
+                                         .build())
+                        .build());
+
+    this->addOption(storm::settings::OptionBuilder(moduleName, aboviSpectralLowerBoundOptionName, false, 
+                                                   "The spectral lower bound used in the adaptive Bayesian optimization value iteration.")
+                        .setShortName(aboviSpectralLowerBoundOptionShortName)
+                        .setIsAdvanced()
+                        .addArgument(storm::settings::ArgumentBuilder::createDoubleArgument("value", "The spectral lower bound to use.")
+                                         .setDefaultValueDouble(0.0)
+                                         .addValidatorDouble(ArgumentValidatorFactory::createDoubleGreaterEqualValidator(0.0))
+                                         .build())
                         .build());
 }
 
@@ -182,6 +208,17 @@ bool NativeEquationSolverSettings::check() const {
     return true;
 }
 
+double NativeEquationSolverSettings::getABOVIEffectiveTolerance() const {
+    return this->getOption(aboviEffectiveToleranceOptionName).getArgumentByName("value").getValueAsDouble();
+}
+
+double NativeEquationSolverSettings::getABOVISpectralUpperBound() const {
+    return this->getOption(aboviSpectralUpperBoundOptionName).getArgumentByName("value").getValueAsDouble();
+}
+
+double NativeEquationSolverSettings::getABOVISpectralLowerBound() const {
+    return this->getOption(aboviSpectralLowerBoundOptionName).getArgumentByName("value").getValueAsDouble();
+}
 }  // namespace modules
 }  // namespace settings
 }  // namespace storm

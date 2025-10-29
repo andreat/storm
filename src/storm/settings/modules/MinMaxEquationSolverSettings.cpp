@@ -15,7 +15,6 @@ const std::string MinMaxEquationSolverSettings::moduleName = "minmax";
 const std::string solvingMethodOptionName = "method";
 const std::string maximalIterationsOptionName = "maxiter";
 const std::string maximalIterationsOptionShortName = "i";
-const std::string effectiveToleranceOptionName = "effective-tolerance";
 const std::string precisionOptionName = "precision";
 const std::string absoluteOptionName = "absolute";
 const std::string valueIterationMultiplicationStyleOptionName = "vimult";
@@ -23,6 +22,12 @@ const std::string forceUniqueSolutionRequirementOptionName = "force-require-uniq
 const std::string lpEqualityForUniqueActionsOptionName = "lp-eq-unique-actions";
 const std::string lpUseNonTrivialBoundsOptionName = "lp-use-nontrivial-bounds";
 const std::string lpOptimizeOnlyInitialStateOptionName = "lp-objective-type";
+const std::string aboviEffectiveToleranceOptionName = "abovi-effective-tolerance";
+const std::string aboviEffectiveToleranceOptionShortName = "aet";
+const std::string aboviSpectralUpperBoundOptionName = "abovi-spectral-upperbound";
+const std::string aboviSpectralUpperBoundOptionShortName = "asub";
+const std::string aboviSpectralLowerBoundOptionName = "abovi-spectral-lowerbound";
+const std::string aboviSpectralLowerBoundOptionShortName = "aslb";
 
 MinMaxEquationSolverSettings::MinMaxEquationSolverSettings() : ModuleSettings(moduleName) {
     std::vector<std::string> minMaxSolvingTechniques = {"vi",          "value-iteration",
@@ -55,15 +60,6 @@ MinMaxEquationSolverSettings::MinMaxEquationSolverSettings() : ModuleSettings(mo
     this->addOption(storm::settings::OptionBuilder(moduleName, precisionOptionName, false, "The precision used for detecting convergence of iterative methods.")
                         .setIsAdvanced()
                         .addArgument(storm::settings::ArgumentBuilder::createDoubleArgument("value", "The precision to achieve.")
-                                         .setDefaultValueDouble(1e-06)
-                                         .addValidatorDouble(ArgumentValidatorFactory::createDoubleRangeValidatorExcluding(0.0, 1.0))
-                                         .build())
-                        .build());
-
-    this->addOption(storm::settings::OptionBuilder(moduleName, effectiveToleranceOptionName, false, 
-                                                   "The effective tolerance used in the adaptive Bayesian optimization value iteration.")
-                        .setIsAdvanced()
-                        .addArgument(storm::settings::ArgumentBuilder::createDoubleArgument("value", "The effective tolerance to use.")
                                          .setDefaultValueDouble(1e-06)
                                          .addValidatorDouble(ArgumentValidatorFactory::createDoubleRangeValidatorExcluding(0.0, 1.0))
                                          .build())
@@ -108,6 +104,36 @@ MinMaxEquationSolverSettings::MinMaxEquationSolverSettings() : ModuleSettings(mo
                              .setDefaultValueString("all")
                              .build())
             .build());
+
+    this->addOption(storm::settings::OptionBuilder(moduleName, aboviEffectiveToleranceOptionName, false, 
+                                                   "The effective tolerance used in the adaptive Bayesian optimization value iteration.")
+                        .setShortName(aboviEffectiveToleranceOptionShortName)
+                        .setIsAdvanced()
+                        .addArgument(storm::settings::ArgumentBuilder::createDoubleArgument("value", "The effective tolerance to use.")
+                                         .setDefaultValueDouble(1e-06)
+                                         .addValidatorDouble(ArgumentValidatorFactory::createDoubleRangeValidatorExcluding(0.0, 1.0))
+                                         .build())
+                        .build());
+
+    this->addOption(storm::settings::OptionBuilder(moduleName, aboviSpectralUpperBoundOptionName, false, 
+                                                   "The spectral upper bound used in the adaptive Bayesian optimization value iteration.")
+                        .setShortName(aboviSpectralUpperBoundOptionShortName)
+                        .setIsAdvanced()
+                        .addArgument(storm::settings::ArgumentBuilder::createDoubleArgument("value", "The spectral upper bound to use.")
+                                         .setDefaultValueDouble(1.0)
+                                         .addValidatorDouble(ArgumentValidatorFactory::createDoubleGreaterValidator(0.0))
+                                         .build())
+                        .build());
+
+    this->addOption(storm::settings::OptionBuilder(moduleName, aboviSpectralLowerBoundOptionName, false, 
+                                                   "The spectral lower bound used in the adaptive Bayesian optimization value iteration.")
+                        .setShortName(aboviSpectralLowerBoundOptionShortName)
+                        .setIsAdvanced()
+                        .addArgument(storm::settings::ArgumentBuilder::createDoubleArgument("value", "The spectral lower bound to use.")
+                                         .setDefaultValueDouble(0.0)
+                                         .addValidatorDouble(ArgumentValidatorFactory::createDoubleGreaterEqualValidator(0.0))
+                                         .build())
+                        .build());
 }
 
 storm::solver::MinMaxMethod MinMaxEquationSolverSettings::getMinMaxEquationSolvingMethod() const {
@@ -202,6 +228,18 @@ bool MinMaxEquationSolverSettings::getLpUseNonTrivialBounds() const {
 
 bool MinMaxEquationSolverSettings::getLpUseEqualityForTrivialActions() const {
     return this->getOption(lpEqualityForUniqueActionsOptionName).getHasOptionBeenSet();
+}
+
+double MinMaxEquationSolverSettings::getABOVIEffectiveTolerance() const {
+    return this->getOption(aboviEffectiveToleranceOptionName).getArgumentByName("value").getValueAsDouble();
+}
+
+double MinMaxEquationSolverSettings::getABOVISpectralUpperBound() const {
+    return this->getOption(aboviSpectralUpperBoundOptionName).getArgumentByName("value").getValueAsDouble();
+}
+
+double MinMaxEquationSolverSettings::getABOVISpectralLowerBound() const {
+    return this->getOption(aboviSpectralLowerBoundOptionName).getArgumentByName("value").getValueAsDouble();
 }
 
 }  // namespace modules

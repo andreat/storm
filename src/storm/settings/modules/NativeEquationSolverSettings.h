@@ -112,6 +112,27 @@ class NativeEquationSolverSettings : public ModuleSettings {
 
     bool check() const override;
 
+    /*!
+     * Retrieves the value of the effective tolerance to be used for the adaptive Bayesian optimization value iteration method.
+     *
+     * @return The value of the effective tolerance to be used.
+     */
+    double getABOVIEffectiveTolerance() const;
+
+    /*!
+     * Retrieves the value of the spectral upper bound to be used for the adaptive Bayesian optimization value iteration method.
+     *
+     * @return The value of the spectral upper bound to be used.
+     */
+    double getABOVISpectralUpperBound() const;
+
+    /*!
+     * Retrieves the value of the spectral lower bound to be used for the adaptive Bayesian optimization value iteration method.
+     *
+     * @return The value of the spectral lower bound to be used.
+     */
+    double getABOVISpectralLowerBound() const;
+
     // The name of the module.
     static const std::string moduleName;
 
@@ -121,12 +142,17 @@ class NativeEquationSolverSettings : public ModuleSettings {
     static const std::string omegaOptionName;
     static const std::string maximalIterationsOptionName;
     static const std::string maximalIterationsOptionShortName;
-    static const std::string effectiveToleranceOptionName;
     static const std::string precisionOptionName;
     static const std::string absoluteOptionName;
     static const std::string intervalIterationSymmetricUpdatesOptionName;
     static const std::string powerMethodMultiplicationStyleOptionName;
     static const std::string forceBoundsOptionName;
+    static const std::string aboviEffectiveToleranceOptionName;
+    static const std::string aboviEffectiveToleranceOptionShortName;
+    static const std::string aboviSpectralUpperBoundOptionName;
+    static const std::string aboviSpectralUpperBoundOptionShortName;
+    static const std::string aboviSpectralLowerBoundOptionName;
+    static const std::string aboviSpectralLowerBoundOptionShortName;
 };
 
 }  // namespace modules

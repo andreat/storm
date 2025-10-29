@@ -69,12 +69,28 @@ void MinMaxSolverEnvironment::setRelativeTerminationCriterion(bool value) {
     considerRelativeTerminationCriterion = value;
 }
 
-storm::RationalNumber const& MinMaxSolverEnvironment::getEffectiveTolerance() const {
-    return effectiveTolerance;
+storm::RationalNumber const& MinMaxSolverEnvironment::getABOVIEffectiveTolerance() const {
+    return aboviEffectiveTolerance;
 }
 
-void MinMaxSolverEnvironment::setEffectiveTolerance(storm::RationalNumber const& value) {
-    effectiveTolerance = value;
+void MinMaxSolverEnvironment::setABOVIEffectiveTolerance(storm::RationalNumber const& value) {
+    aboviEffectiveTolerance = value;
+}
+
+storm::RationalNumber const& MinMaxSolverEnvironment::getABOVISpectralUpperBound() const {
+    return aboviSpectralUpperBound;
+}
+
+void MinMaxSolverEnvironment::setABOVISpectralUpperBound(storm::RationalNumber const& value) {
+    aboviSpectralUpperBound = value;
+}
+
+storm::RationalNumber const& MinMaxSolverEnvironment::getABOVISpectralLowerBound() const {
+    return aboviSpectralLowerBound;
+}
+
+void MinMaxSolverEnvironment::setABOVISpectralLowerBound(storm::RationalNumber const& value) {
+    aboviSpectralLowerBound = value;
 }
 
 storm::solver::MultiplicationStyle const& MinMaxSolverEnvironment::getMultiplicationStyle() const {

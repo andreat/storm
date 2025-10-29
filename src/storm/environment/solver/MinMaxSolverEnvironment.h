@@ -24,8 +24,12 @@ class MinMaxSolverEnvironment {
     void setPrecision(storm::RationalNumber value);
     bool const& getRelativeTerminationCriterion() const;
     void setRelativeTerminationCriterion(bool value);
-    storm::RationalNumber const& getEffectiveTolerance() const;
-    void setEffectiveTolerance(storm::RationalNumber const& value);
+    storm::RationalNumber const& getABOVIEffectiveTolerance() const;
+    void setABOVIEffectiveTolerance(storm::RationalNumber const& value);
+    storm::RationalNumber const& getABOVISpectralUpperBound() const;
+    void setABOVISpectralUpperBound(storm::RationalNumber const& value);
+    storm::RationalNumber const& getABOVISpectralLowerBound() const;
+    void setABOVISpectralLowerBound(storm::RationalNumber const& value);
     storm::solver::MultiplicationStyle const& getMultiplicationStyle() const;
     void setMultiplicationStyle(storm::solver::MultiplicationStyle value);
     bool isForceRequireUnique() const;
@@ -39,7 +43,9 @@ class MinMaxSolverEnvironment {
     uint64_t maxIterationCount;
     storm::RationalNumber precision;
     bool considerRelativeTerminationCriterion;
-    storm::RationalNumber effectiveTolerance;
+    storm::RationalNumber aboviEffectiveTolerance;
+    storm::RationalNumber aboviSpectralUpperBound;
+    storm::RationalNumber aboviSpectralLowerBound;
     storm::solver::MultiplicationStyle multiplicationStyle;
     bool forceRequireUnique;
     SubEnvironment<MinMaxLpSolverEnvironment> lpEnvironment;
