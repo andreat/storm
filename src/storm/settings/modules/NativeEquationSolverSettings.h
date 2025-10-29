@@ -121,6 +121,7 @@ class NativeEquationSolverSettings : public ModuleSettings {
     static const std::string omegaOptionName;
     static const std::string maximalIterationsOptionName;
     static const std::string maximalIterationsOptionShortName;
+    static const std::string effectiveToleranceOptionName;
     static const std::string precisionOptionName;
     static const std::string absoluteOptionName;
     static const std::string intervalIterationSymmetricUpdatesOptionName;

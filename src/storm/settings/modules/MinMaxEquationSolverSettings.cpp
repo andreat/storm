@@ -15,6 +15,7 @@ const std::string MinMaxEquationSolverSettings::moduleName = "minmax";
 const std::string solvingMethodOptionName = "method";
 const std::string maximalIterationsOptionName = "maxiter";
 const std::string maximalIterationsOptionShortName = "i";
+const std::string effectiveToleranceOptionName = "effective-tolerance";
 const std::string precisionOptionName = "precision";
 const std::string absoluteOptionName = "absolute";
 const std::string valueIterationMultiplicationStyleOptionName = "vimult";
@@ -54,6 +55,15 @@ MinMaxEquationSolverSettings::MinMaxEquationSolverSettings() : ModuleSettings(mo
     this->addOption(storm::settings::OptionBuilder(moduleName, precisionOptionName, false, "The precision used for detecting convergence of iterative methods.")
                         .setIsAdvanced()
                         .addArgument(storm::settings::ArgumentBuilder::createDoubleArgument("value", "The precision to achieve.")
+                                         .setDefaultValueDouble(1e-06)
+                                         .addValidatorDouble(ArgumentValidatorFactory::createDoubleRangeValidatorExcluding(0.0, 1.0))
+                                         .build())
+                        .build());
+
+    this->addOption(storm::settings::OptionBuilder(moduleName, effectiveToleranceOptionName, false, 
+                                                   "The effective tolerance used in the adaptive Bayesian optimization value iteration.")
+                        .setIsAdvanced()
+                        .addArgument(storm::settings::ArgumentBuilder::createDoubleArgument("value", "The effective tolerance to use.")
                                          .setDefaultValueDouble(1e-06)
                                          .addValidatorDouble(ArgumentValidatorFactory::createDoubleRangeValidatorExcluding(0.0, 1.0))
                                          .build())

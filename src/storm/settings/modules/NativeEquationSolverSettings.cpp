@@ -18,6 +18,7 @@ namespace modules {
 const std::string NativeEquationSolverSettings::moduleName = "native";
 const std::string NativeEquationSolverSettings::techniqueOptionName = "method";
 const std::string NativeEquationSolverSettings::omegaOptionName = "soromega";
+const std::string NativeEquationSolverSettings::effectiveToleranceOptionName = "effective-tolerance";
 const std::string NativeEquationSolverSettings::maximalIterationsOptionName = "maxiter";
 const std::string NativeEquationSolverSettings::maximalIterationsOptionShortName = "i";
 const std::string NativeEquationSolverSettings::precisionOptionName = "precision";
@@ -62,6 +63,15 @@ NativeEquationSolverSettings::NativeEquationSolverSettings() : ModuleSettings(mo
                         .setIsAdvanced()
                         .addArgument(storm::settings::ArgumentBuilder::createDoubleArgument("value", "The value of the SOR parameter.")
                                          .setDefaultValueDouble(0.9)
+                                         .addValidatorDouble(ArgumentValidatorFactory::createDoubleRangeValidatorExcluding(0.0, 1.0))
+                                         .build())
+                        .build());
+
+    this->addOption(storm::settings::OptionBuilder(moduleName, effectiveToleranceOptionName, false, 
+                                                   "The effective tolerance used in the adaptive Bayesian optimization value iteration.")
+                        .setIsAdvanced()
+                        .addArgument(storm::settings::ArgumentBuilder::createDoubleArgument("value", "The effective tolerance to use.")
+                                         .setDefaultValueDouble(1e-06)
                                          .addValidatorDouble(ArgumentValidatorFactory::createDoubleRangeValidatorExcluding(0.0, 1.0))
                                          .build())
                         .build());

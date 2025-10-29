@@ -26,6 +26,8 @@ class NativeSolverEnvironment {
     void setPowerMethodMultiplicationStyle(storm::solver::MultiplicationStyle value);
     storm::RationalNumber const& getSorOmega() const;
     void setSorOmega(storm::RationalNumber const& value);
+    storm::RationalNumber const& getEffectiveTolerance() const;
+    void setEffectiveTolerance(storm::RationalNumber const& value);
     bool isSymmetricUpdatesSet() const;
     void setSymmetricUpdates(bool value);
 
@@ -38,5 +40,6 @@ class NativeSolverEnvironment {
     storm::solver::MultiplicationStyle powerMethodMultiplicationStyle;
     storm::RationalNumber sorOmega;
     bool symmetricUpdates;
+    storm::RationalNumber effectiveTolerance;
 };
 }  // namespace storm

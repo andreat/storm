@@ -85,6 +85,14 @@ void NativeSolverEnvironment::setSorOmega(storm::RationalNumber const& value) {
     sorOmega = value;
 }
 
+storm::RationalNumber const& NativeSolverEnvironment::getEffectiveTolerance() const {
+    return effectiveTolerance;
+}
+
+void NativeSolverEnvironment::setEffectiveTolerance(storm::RationalNumber const& value) {
+    effectiveTolerance = value;
+}
+
 bool NativeSolverEnvironment::isSymmetricUpdatesSet() const {
     return symmetricUpdates;
 }

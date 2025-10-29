@@ -69,6 +69,14 @@ void MinMaxSolverEnvironment::setRelativeTerminationCriterion(bool value) {
     considerRelativeTerminationCriterion = value;
 }
 
+storm::RationalNumber const& MinMaxSolverEnvironment::getEffectiveTolerance() const {
+    return effectiveTolerance;
+}
+
+void MinMaxSolverEnvironment::setEffectiveTolerance(storm::RationalNumber const& value) {
+    effectiveTolerance = value;
+}
+
 storm::solver::MultiplicationStyle const& MinMaxSolverEnvironment::getMultiplicationStyle() const {
     return multiplicationStyle;
 }
