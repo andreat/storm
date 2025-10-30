@@ -46,6 +46,7 @@ TopologicalEquationSolverSettings::TopologicalEquationSolverSettings() : ModuleS
                                                         "lp",       "linear-programming",
                                                         "rs",       "ratsearch",
                                                         "ii",       "interval-iteration",
+                                                        "abovi",    "adaptive-bayesian-optimization-value-iteration",
                                                         "svi",      "sound-value-iteration",
                                                         "ovi",      "optimistic-value-iteration",
                                                         "gvi",      "guessing-value-iteration",

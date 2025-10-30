@@ -26,6 +26,9 @@ MinMaxSolverEnvironment::MinMaxSolverEnvironment() {
                      "Unknown convergence criterion");
     multiplicationStyle = minMaxSettings.getValueIterationMultiplicationStyle();
     forceRequireUnique = minMaxSettings.isForceUniqueSolutionRequirementSet();
+    aboviEffectiveTolerance = minMaxSettings.getABOVIEffectiveTolerance();
+    aboviSpectralUpperBound = minMaxSettings.getABOVISpectralUpperBound();
+    aboviSpectralLowerBound = minMaxSettings.getABOVISpectralLowerBound();
 }
 
 MinMaxSolverEnvironment::~MinMaxSolverEnvironment() {

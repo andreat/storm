@@ -80,6 +80,7 @@ MinMaxMethod IterativeMinMaxLinearEquationSolver<ValueType, SolutionType>::getMe
     }
     STORM_LOG_THROW(method == MinMaxMethod::ValueIteration || method == MinMaxMethod::PolicyIteration || method == MinMaxMethod::RationalSearch ||
                         method == MinMaxMethod::SoundValueIteration || method == MinMaxMethod::IntervalIteration ||
+                        method == MinMaxMethod::AdaptiveBayesianOptimizationValueIteration ||
                         method == MinMaxMethod::OptimisticValueIteration || method == MinMaxMethod::GuessingValueIteration || method == MinMaxMethod::ViToPi,
                     storm::exceptions::InvalidEnvironmentException, "This solver does not support the selected method '" << toString(method) << "'.");
     return method;
@@ -774,6 +775,12 @@ bool IterativeMinMaxLinearEquationSolver<ValueType, SolutionType>::solveEquation
             Environment const& env, OptimizationDirection dir, std::vector<SolutionType>& x, std::vector<ValueType> const& b) const {
 
     setUpViOperator();
+
+    const uint64_t nstates{this->A->getRowGroupCount()};
+    const ValueType ONE{storm::utility::one<ValueType>()};
+    const ValueType ZERO{storm::utility::zero<ValueType>()};
+    const std::vector<ValueType> ZERO_VECTOR{std::vector<ValueType>(nstates, ZERO)};
+
     // By default, we can not provide any guarantee
     SolverGuarantee guarantee = SolverGuarantee::None;
 
@@ -826,11 +833,47 @@ bool IterativeMinMaxLinearEquationSolver<ValueType, SolutionType>::solveEquation
         }
     }
 
+    // This controls termination of the value iteration through a call to viCallback. 
+    // It can access all variables defined above and the ones inside viHelper.VI
+    const ValueType effectiveTolerance{storm::utility::convertNumber<ValueType>(env.solver().minMax().getABOVIEffectiveTolerance())};
+    const ValueType spectralLowerbound{storm::utility::convertNumber<ValueType>(env.solver().minMax().getABOVISpectralLowerBound())};
+    const ValueType spectralUpperbound{storm::utility::convertNumber<ValueType>(env.solver().minMax().getABOVISpectralUpperBound())};
+    std::vector<ValueType> previousX{std::vector<ValueType>(nstates, ZERO)};
+    std::vector<ValueType> previousR{std::vector<ValueType>(nstates, ZERO)};
+    std::vector<ValueType> currentR{std::vector<ValueType>(nstates, ZERO)};
+    ValueType norm_previousR{ZERO};
+
+    bool isFirst{true};
+
     uint64_t numIterations{0};
+    
     auto viCallback = [&](SolverStatus const& current) {
         this->showProgressIterative(numIterations);
-        return this->updateStatus(current, x, guarantee, numIterations, env.solver().minMax().getMaximalNumberOfIterations());
+        SolverStatus status{current};
+    
+        std::vector<ValueType> currentEstimate{std::vector<ValueType>(nstates, ZERO)};
+        storm::utility::vector::subtractVectors(x, previousX, currentR);
+        ValueType norm_currentR{storm::utility::vector::maximumElementAbs(currentR)};
+        // we need at least two iterations to have actual data to work on
+        if (isFirst) {
+            isFirst = false;
+            status = SolverStatus::InProgress;
+        } else {
+            ValueType currentRho{std::min<ValueType>(spectralUpperbound, std::max<ValueType>(spectralLowerbound, norm_currentR / norm_previousR))};
+            storm::utility::vector::addVectors(currentR, ZERO_VECTOR, currentEstimate);
+            storm::utility::vector::scaleVectorInPlace(currentEstimate, ONE / (ONE - currentRho));
+            ValueType norm_currentEstimate{storm::utility::vector::maximumElementAbs(currentEstimate)};
+STORM_LOG_WARN("iteration: " << numIterations << " -- currentRho: " << currentRho << " -- norm_currentEstimate: " << norm_currentEstimate);
+            if (norm_currentEstimate <= effectiveTolerance) {
+                status = SolverStatus::Converged;
+            }
+        }
+        storm::utility::vector::addVectors(currentR, ZERO_VECTOR, previousR);
+        storm::utility::vector::addVectors(x, ZERO_VECTOR, previousX);
+        norm_previousR = norm_currentR;
+        return this->updateStatus(status, false, numIterations, env.solver().minMax().getMaximalNumberOfIterations());
     };
+
     this->startMeasureProgress();
     // This code duplication is necessary because the helper class is different for the two cases.
     if (this->A->hasTrivialRowGrouping()) {

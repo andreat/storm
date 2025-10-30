@@ -23,11 +23,8 @@ const std::string lpEqualityForUniqueActionsOptionName = "lp-eq-unique-actions";
 const std::string lpUseNonTrivialBoundsOptionName = "lp-use-nontrivial-bounds";
 const std::string lpOptimizeOnlyInitialStateOptionName = "lp-objective-type";
 const std::string aboviEffectiveToleranceOptionName = "abovi-effective-tolerance";
-const std::string aboviEffectiveToleranceOptionShortName = "aet";
 const std::string aboviSpectralUpperBoundOptionName = "abovi-spectral-upperbound";
-const std::string aboviSpectralUpperBoundOptionShortName = "asub";
 const std::string aboviSpectralLowerBoundOptionName = "abovi-spectral-lowerbound";
-const std::string aboviSpectralLowerBoundOptionShortName = "aslb";
 
 MinMaxEquationSolverSettings::MinMaxEquationSolverSettings() : ModuleSettings(moduleName) {
     std::vector<std::string> minMaxSolvingTechniques = {"vi",          "value-iteration",
@@ -107,7 +104,6 @@ MinMaxEquationSolverSettings::MinMaxEquationSolverSettings() : ModuleSettings(mo
 
     this->addOption(storm::settings::OptionBuilder(moduleName, aboviEffectiveToleranceOptionName, false, 
                                                    "The effective tolerance used in the adaptive Bayesian optimization value iteration.")
-                        .setShortName(aboviEffectiveToleranceOptionShortName)
                         .setIsAdvanced()
                         .addArgument(storm::settings::ArgumentBuilder::createDoubleArgument("value", "The effective tolerance to use.")
                                          .setDefaultValueDouble(1e-06)
@@ -117,7 +113,6 @@ MinMaxEquationSolverSettings::MinMaxEquationSolverSettings() : ModuleSettings(mo
 
     this->addOption(storm::settings::OptionBuilder(moduleName, aboviSpectralUpperBoundOptionName, false, 
                                                    "The spectral upper bound used in the adaptive Bayesian optimization value iteration.")
-                        .setShortName(aboviSpectralUpperBoundOptionShortName)
                         .setIsAdvanced()
                         .addArgument(storm::settings::ArgumentBuilder::createDoubleArgument("value", "The spectral upper bound to use.")
                                          .setDefaultValueDouble(1.0)
@@ -127,7 +122,6 @@ MinMaxEquationSolverSettings::MinMaxEquationSolverSettings() : ModuleSettings(mo
 
     this->addOption(storm::settings::OptionBuilder(moduleName, aboviSpectralLowerBoundOptionName, false, 
                                                    "The spectral lower bound used in the adaptive Bayesian optimization value iteration.")
-                        .setShortName(aboviSpectralLowerBoundOptionShortName)
                         .setIsAdvanced()
                         .addArgument(storm::settings::ArgumentBuilder::createDoubleArgument("value", "The spectral lower bound to use.")
                                          .setDefaultValueDouble(0.0)
