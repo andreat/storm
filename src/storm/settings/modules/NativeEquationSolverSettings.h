@@ -148,11 +148,8 @@ class NativeEquationSolverSettings : public ModuleSettings {
     static const std::string powerMethodMultiplicationStyleOptionName;
     static const std::string forceBoundsOptionName;
     static const std::string aboviEffectiveToleranceOptionName;
-    static const std::string aboviEffectiveToleranceOptionShortName;
     static const std::string aboviSpectralUpperBoundOptionName;
-    static const std::string aboviSpectralUpperBoundOptionShortName;
     static const std::string aboviSpectralLowerBoundOptionName;
-    static const std::string aboviSpectralLowerBoundOptionShortName;
 };
 
 }  // namespace modules

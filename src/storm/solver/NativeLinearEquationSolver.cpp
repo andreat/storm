@@ -63,64 +63,69 @@ void NativeLinearEquationSolver<ValueType>::setUpViOperator() const {
 template<typename ValueType>
 bool NativeLinearEquationSolver<ValueType>::solveEquationsAdaptiveBayesianOptimizationValueIteration(Environment const& env, std::vector<ValueType>& x, std::vector<ValueType> const& b) const {
 
-    STORM_LOG_WARN("ABO solver here!!!");
+    // Prepare the solution vectors.
+    setUpViOperator();
 
-    if (!this->cachedRowVector) {
-        this->cachedRowVector = std::make_unique<std::vector<ValueType>>(getMatrixRowCount());
-    }
+    const uint64_t nstates{getMatrixRowCount()};
+    const ValueType ONE{storm::utility::one<ValueType>()};
+    const ValueType ZERO{storm::utility::zero<ValueType>()};
+    const std::vector<ValueType> ZERO_VECTOR{std::vector<ValueType>(nstates, ZERO)};
 
-    // Get a Jacobi decomposition of the matrix A.
-    if (!jacobiDecomposition) {
-        jacobiDecomposition = std::make_unique<JacobiDecomposition>(env, *A);
-    }
+    storm::solver::helper::ValueIterationHelper<ValueType, true> viHelper(viOperator);
 
-    ValueType precision = storm::utility::convertNumber<ValueType>(env.solver().native().getPrecision());
-    uint64_t maxIter = env.solver().native().getMaximalNumberOfIterations();
-    bool relative = env.solver().native().getRelativeTerminationCriterion();
+    // This controls termination of the value iteration through a call to viCallback. 
+    // It can access all variables defined above and the ones inside viHelper.VI
+    const ValueType effectiveTolerance{storm::utility::convertNumber<ValueType>(env.solver().native().getABOVIEffectiveTolerance())};
+    const ValueType spectralLowerbound{storm::utility::convertNumber<ValueType>(env.solver().native().getABOVISpectralLowerBound())};
+    const ValueType spectralUpperbound{storm::utility::convertNumber<ValueType>(env.solver().native().getABOVISpectralUpperBound())};
+    std::vector<ValueType> previousX{std::vector<ValueType>(nstates, ZERO)};
+    std::vector<ValueType> previousR{std::vector<ValueType>(nstates, ZERO)};
+    std::vector<ValueType> currentR{std::vector<ValueType>(nstates, ZERO)};
+    ValueType norm_previousR{ZERO};
 
-    std::vector<ValueType>* currentX = &x;
-    std::vector<ValueType>* nextX = this->cachedRowVector.get();
+    bool isFirst{true};
 
-    // Set up additional environment variables.
-    uint_fast64_t iterations = 0;
-    SolverStatus status = SolverStatus::InProgress;
+    uint64_t numIterations{0};
+    
+    auto viCallback = [&](SolverStatus const& current) {
+        this->showProgressIterative(numIterations);
+        SolverStatus status{current};
+    
+        std::vector<ValueType> currentEstimate{std::vector<ValueType>(nstates, ZERO)};
+        storm::utility::vector::subtractVectors(x, previousX, currentR);
+        ValueType norm_currentR{storm::utility::vector::maximumElementAbs(currentR)};
+        // we need at least two iterations to have actual data to work on
+        if (isFirst) {
+            isFirst = false;
+            status = SolverStatus::InProgress;
+        } else {
+            ValueType currentRho{std::min<ValueType>(spectralUpperbound, std::max<ValueType>(spectralLowerbound, norm_currentR / norm_previousR))};
+            storm::utility::vector::addVectors(currentR, ZERO_VECTOR, currentEstimate);
+            storm::utility::vector::scaleVectorInPlace(currentEstimate, ONE / (ONE - currentRho));
+            ValueType norm_currentEstimate{storm::utility::vector::maximumElementAbs(currentEstimate)};
+STORM_LOG_WARN("iteration: " << numIterations << " -- currentRho: " << currentRho << " -- norm_currentEstimate: " << norm_currentEstimate);
+            if (norm_currentEstimate <= effectiveTolerance) {
+                status = SolverStatus::Converged;
+            }
+        }
+        storm::utility::vector::addVectors(currentR, ZERO_VECTOR, previousR);
+        storm::utility::vector::addVectors(x, ZERO_VECTOR, previousX);
+        norm_previousR = norm_currentR;
+        return this->updateStatus(status, false, numIterations, env.solver().native().getMaximalNumberOfIterations());
+    };
 
     this->startMeasureProgress();
-    while (status == SolverStatus::InProgress && iterations < maxIter) {
-        // Compute D^-1 * (b - LU * x) and store result in nextX.
-        jacobiDecomposition->multiplier->multiply(env, *currentX, nullptr, *nextX);
-        storm::utility::vector::subtractVectors(b, *nextX, *nextX);
-        storm::utility::vector::multiplyVectorsPointwise(jacobiDecomposition->DVector, *nextX, *nextX);
+    auto status = viHelper.VI(x, b, numIterations, env.solver().native().getRelativeTerminationCriterion(),
+                              storm::utility::convertNumber<ValueType>(env.solver().native().getPrecision()), {}, viCallback,
+                              env.solver().native().getPowerMethodMultiplicationStyle());
 
-        // Now check if the process already converged within our precision.
-        if (storm::utility::vector::equalModuloPrecision<ValueType>(*currentX, *nextX, precision, relative)) {
-            status = SolverStatus::Converged;
-        }
-        // Swap the two pointers as a preparation for the next iteration.
-        std::swap(nextX, currentX);
-
-        // Potentially show progress.
-        this->showProgressIterative(iterations);
-
-        // Increase iteration count so we can abort if convergence is too slow.
-        ++iterations;
-
-        status = this->updateStatus(status, *currentX, SolverGuarantee::None, iterations, maxIter);
-    }
-
-    // If the last iteration did not write to the original x we have to swap the contents, because the
-    // output has to be written to the input parameter x.
-    if (currentX == this->cachedRowVector.get()) {
-        std::swap(x, *currentX);
-    }
+    this->reportStatus(status, numIterations);
 
     if (!this->isCachingEnabled()) {
         clearCache();
     }
 
-    this->reportStatus(status, iterations);
-
-    return status == SolverStatus::Converged;
+    return status == SolverStatus::Converged || status == SolverStatus::TerminatedEarly;
 }
 
 template<typename ValueType>
@@ -182,8 +187,6 @@ NativeLinearEquationSolver<ValueType>::JacobiDecomposition::JacobiDecomposition(
 template<typename ValueType>
 bool NativeLinearEquationSolver<ValueType>::solveEquationsJacobi(Environment const& env, std::vector<ValueType>& x, std::vector<ValueType> const& b) const {
     STORM_LOG_INFO("Solving linear equation system (" << x.size() << " rows) with NativeLinearEquationSolver (Jacobi)");
-
-    STORM_LOG_WARN("JACOBI solver here!!!");
 
     if (!this->cachedRowVector) {
         this->cachedRowVector = std::make_unique<std::vector<ValueType>>(getMatrixRowCount());
@@ -740,7 +743,9 @@ LinearEquationSolverProblemFormat NativeLinearEquationSolver<ValueType>::getEqua
     auto method = getMethod(env, storm::NumberTraits<ValueType>::IsExact || env.solver().isForceExact());
     if (method == NativeLinearEquationSolverMethod::Power || method == NativeLinearEquationSolverMethod::SoundValueIteration ||
         method == NativeLinearEquationSolverMethod::OptimisticValueIteration || method == NativeLinearEquationSolverMethod::RationalSearch ||
-        method == NativeLinearEquationSolverMethod::IntervalIteration || method == NativeLinearEquationSolverMethod::GuessingValueIteration) {
+        method == NativeLinearEquationSolverMethod::IntervalIteration || method == NativeLinearEquationSolverMethod::GuessingValueIteration || 
+        method == NativeLinearEquationSolverMethod::AdaptiveBayesianOptimizationValueIteration
+    ) {
         return LinearEquationSolverProblemFormat::FixedPointSystem;
     } else {
         return LinearEquationSolverProblemFormat::EquationSystem;

@@ -26,6 +26,9 @@ NativeSolverEnvironment::NativeSolverEnvironment() {
     powerMethodMultiplicationStyle = nativeSettings.getPowerMethodMultiplicationStyle();
     sorOmega = storm::utility::convertNumber<storm::RationalNumber>(nativeSettings.getOmega());
     symmetricUpdates = nativeSettings.isForceIntervalIterationSymmetricUpdatesSet();
+    aboviEffectiveTolerance = nativeSettings.getABOVIEffectiveTolerance();
+    aboviSpectralUpperBound = nativeSettings.getABOVISpectralUpperBound();
+    aboviSpectralLowerBound = nativeSettings.getABOVISpectralLowerBound();
 }
 
 NativeSolverEnvironment::~NativeSolverEnvironment() {

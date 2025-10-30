@@ -25,16 +25,13 @@ const std::string NativeEquationSolverSettings::absoluteOptionName = "absolute";
 const std::string NativeEquationSolverSettings::powerMethodMultiplicationStyleOptionName = "powmult";
 const std::string NativeEquationSolverSettings::intervalIterationSymmetricUpdatesOptionName = "symmetricupdates";
 const std::string NativeEquationSolverSettings::aboviEffectiveToleranceOptionName = "abovi-effective-tolerance";
-const std::string NativeEquationSolverSettings::aboviEffectiveToleranceOptionShortName = "aet";
 const std::string NativeEquationSolverSettings::aboviSpectralUpperBoundOptionName = "abovi-spectral-upperbound";
-const std::string NativeEquationSolverSettings::aboviSpectralUpperBoundOptionShortName = "asub";
 const std::string NativeEquationSolverSettings::aboviSpectralLowerBoundOptionName = "abovi-spectral-lowerbound";
-const std::string NativeEquationSolverSettings::aboviSpectralLowerBoundOptionShortName = "aslu";
 
 NativeEquationSolverSettings::NativeEquationSolverSettings() : ModuleSettings(moduleName) {
     std::vector<std::string> methods = {"jacobi", "gaussseidel",
                                         "sor",    "walkerchae",
-                                        "abovi",  "adaptive-bayesian-optimization-value-iteration"
+                                        "abovi",  "adaptive-bayesian-optimization-value-iteration",
                                         "power",  "sound-value-iteration",
                                         "svi",    "optimistic-value-iteration",
                                         "ovi",    "guessing-value-iteration",
@@ -94,7 +91,6 @@ NativeEquationSolverSettings::NativeEquationSolverSettings() : ModuleSettings(mo
 
     this->addOption(storm::settings::OptionBuilder(moduleName, aboviEffectiveToleranceOptionName, false, 
                                                    "The effective tolerance used in the adaptive Bayesian optimization value iteration.")
-                        .setShortName(aboviEffectiveToleranceOptionShortName)
                         .setIsAdvanced()
                         .addArgument(storm::settings::ArgumentBuilder::createDoubleArgument("value", "The effective tolerance to use.")
                                          .setDefaultValueDouble(1e-06)
@@ -104,7 +100,6 @@ NativeEquationSolverSettings::NativeEquationSolverSettings() : ModuleSettings(mo
 
     this->addOption(storm::settings::OptionBuilder(moduleName, aboviSpectralUpperBoundOptionName, false, 
                                                    "The spectral upper bound used in the adaptive Bayesian optimization value iteration.")
-                        .setShortName(aboviSpectralUpperBoundOptionShortName)
                         .setIsAdvanced()
                         .addArgument(storm::settings::ArgumentBuilder::createDoubleArgument("value", "The spectral upper bound to use.")
                                          .setDefaultValueDouble(1.0)
@@ -114,7 +109,6 @@ NativeEquationSolverSettings::NativeEquationSolverSettings() : ModuleSettings(mo
 
     this->addOption(storm::settings::OptionBuilder(moduleName, aboviSpectralLowerBoundOptionName, false, 
                                                    "The spectral lower bound used in the adaptive Bayesian optimization value iteration.")
-                        .setShortName(aboviSpectralLowerBoundOptionShortName)
                         .setIsAdvanced()
                         .addArgument(storm::settings::ArgumentBuilder::createDoubleArgument("value", "The spectral lower bound to use.")
                                          .setDefaultValueDouble(0.0)
