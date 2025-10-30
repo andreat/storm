@@ -863,7 +863,6 @@ bool IterativeMinMaxLinearEquationSolver<ValueType, SolutionType>::solveEquation
             storm::utility::vector::addVectors(currentR, ZERO_VECTOR, currentEstimate);
             storm::utility::vector::scaleVectorInPlace(currentEstimate, ONE / (ONE - currentRho));
             ValueType norm_currentEstimate{storm::utility::vector::maximumElementAbs(currentEstimate)};
-STORM_LOG_WARN("iteration: " << numIterations << " -- currentRho: " << currentRho << " -- norm_currentEstimate: " << norm_currentEstimate);
             if (norm_currentEstimate <= effectiveTolerance) {
                 status = SolverStatus::Converged;
             }
