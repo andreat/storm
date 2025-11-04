@@ -28,12 +28,10 @@ class NativeSolverEnvironment {
     void setSorOmega(storm::RationalNumber const& value);
     bool isSymmetricUpdatesSet() const;
     void setSymmetricUpdates(bool value);
-    storm::RationalNumber const& getABOVIEffectiveTolerance() const;
-    void setABOVIEffectiveTolerance(storm::RationalNumber const& value);
-    storm::RationalNumber const& getABOVISpectralUpperBound() const;
-    void setABOVISpectralUpperBound(storm::RationalNumber const& value);
-    storm::RationalNumber const& getABOVISpectralLowerBound() const;
-    void setABOVISpectralLowerBound(storm::RationalNumber const& value);
+    storm::RationalNumber getABOVIEffectiveTolerance() const;
+    void setABOVIEffectiveTolerance(storm::RationalNumber value);
+    bool getABOVIPrintEstimatedError() const;
+    void setABOVIPrintEstimatedError(bool value);
 
    private:
     storm::solver::NativeLinearEquationSolverMethod method;
@@ -45,7 +43,6 @@ class NativeSolverEnvironment {
     storm::RationalNumber sorOmega;
     bool symmetricUpdates;
     storm::RationalNumber aboviEffectiveTolerance;
-    storm::RationalNumber aboviSpectralUpperBound;
-    storm::RationalNumber aboviSpectralLowerBound;
+    bool aboviPrintEstimatedError;
 };
 }  // namespace storm

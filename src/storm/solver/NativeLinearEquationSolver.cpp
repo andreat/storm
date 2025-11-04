@@ -76,8 +76,7 @@ bool NativeLinearEquationSolver<ValueType>::solveEquationsAdaptiveBayesianOptimi
     // This controls termination of the value iteration through a call to viCallback. 
     // It can access all variables defined above and the ones inside viHelper.VI
     const ValueType effectiveTolerance{storm::utility::convertNumber<ValueType>(env.solver().native().getABOVIEffectiveTolerance())};
-    const ValueType spectralLowerbound{storm::utility::convertNumber<ValueType>(env.solver().native().getABOVISpectralLowerBound())};
-    const ValueType spectralUpperbound{storm::utility::convertNumber<ValueType>(env.solver().native().getABOVISpectralUpperBound())};
+    const bool printEstimatedError{env.solver().native().getABOVIPrintEstimatedError()};
     std::vector<ValueType> previousX{std::vector<ValueType>(nstates, ZERO)};
     std::vector<ValueType> previousR{std::vector<ValueType>(nstates, ZERO)};
     std::vector<ValueType> currentR{std::vector<ValueType>(nstates, ZERO)};
@@ -99,12 +98,17 @@ bool NativeLinearEquationSolver<ValueType>::solveEquationsAdaptiveBayesianOptimi
             isFirst = false;
             status = SolverStatus::InProgress;
         } else {
-            ValueType currentRho{std::min<ValueType>(spectralUpperbound, std::max<ValueType>(spectralLowerbound, norm_currentR / norm_previousR))};
-            storm::utility::vector::addVectors(currentR, ZERO_VECTOR, currentEstimate);
-            storm::utility::vector::scaleVectorInPlace(currentEstimate, ONE / (ONE - currentRho));
-            ValueType norm_currentEstimate{storm::utility::vector::maximumElementAbs(currentEstimate)};
-            if (norm_currentEstimate <= effectiveTolerance) {
-                status = SolverStatus::Converged;
+            ValueType currentRho{norm_currentR / norm_previousR};
+            if (currentRho < ONE) {
+                storm::utility::vector::addVectors(currentR, ZERO_VECTOR, currentEstimate);
+                storm::utility::vector::scaleVectorInPlace(currentEstimate, ONE / (ONE - currentRho));
+                ValueType norm_currentEstimate{storm::utility::vector::maximumElementAbs(currentEstimate)};
+                if (norm_currentEstimate <= effectiveTolerance) {
+                    status = SolverStatus::Converged;
+                    if (printEstimatedError) {
+                        std::cout << "Estimated error: " << norm_currentEstimate << "\n";
+                    }
+                }
             }
         }
         storm::utility::vector::addVectors(currentR, ZERO_VECTOR, previousR);

@@ -27,8 +27,7 @@ MinMaxSolverEnvironment::MinMaxSolverEnvironment() {
     multiplicationStyle = minMaxSettings.getValueIterationMultiplicationStyle();
     forceRequireUnique = minMaxSettings.isForceUniqueSolutionRequirementSet();
     aboviEffectiveTolerance = minMaxSettings.getABOVIEffectiveTolerance();
-    aboviSpectralUpperBound = minMaxSettings.getABOVISpectralUpperBound();
-    aboviSpectralLowerBound = minMaxSettings.getABOVISpectralLowerBound();
+    aboviPrintEstimatedError = minMaxSettings.getABOVIPrintEstimatedError();
 }
 
 MinMaxSolverEnvironment::~MinMaxSolverEnvironment() {
@@ -72,28 +71,20 @@ void MinMaxSolverEnvironment::setRelativeTerminationCriterion(bool value) {
     considerRelativeTerminationCriterion = value;
 }
 
-storm::RationalNumber const& MinMaxSolverEnvironment::getABOVIEffectiveTolerance() const {
+storm::RationalNumber MinMaxSolverEnvironment::getABOVIEffectiveTolerance() const {
     return aboviEffectiveTolerance;
 }
 
-void MinMaxSolverEnvironment::setABOVIEffectiveTolerance(storm::RationalNumber const& value) {
+void MinMaxSolverEnvironment::setABOVIEffectiveTolerance(storm::RationalNumber value) {
     aboviEffectiveTolerance = value;
 }
 
-storm::RationalNumber const& MinMaxSolverEnvironment::getABOVISpectralUpperBound() const {
-    return aboviSpectralUpperBound;
+bool MinMaxSolverEnvironment::getABOVIPrintEstimatedError() const {
+    return aboviPrintEstimatedError;
 }
 
-void MinMaxSolverEnvironment::setABOVISpectralUpperBound(storm::RationalNumber const& value) {
-    aboviSpectralUpperBound = value;
-}
-
-storm::RationalNumber const& MinMaxSolverEnvironment::getABOVISpectralLowerBound() const {
-    return aboviSpectralLowerBound;
-}
-
-void MinMaxSolverEnvironment::setABOVISpectralLowerBound(storm::RationalNumber const& value) {
-    aboviSpectralLowerBound = value;
+void MinMaxSolverEnvironment::setABOVIPrintEstimatedError(bool value) {
+    aboviPrintEstimatedError = value;
 }
 
 storm::solver::MultiplicationStyle const& MinMaxSolverEnvironment::getMultiplicationStyle() const {

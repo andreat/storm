@@ -27,8 +27,7 @@ NativeSolverEnvironment::NativeSolverEnvironment() {
     sorOmega = storm::utility::convertNumber<storm::RationalNumber>(nativeSettings.getOmega());
     symmetricUpdates = nativeSettings.isForceIntervalIterationSymmetricUpdatesSet();
     aboviEffectiveTolerance = nativeSettings.getABOVIEffectiveTolerance();
-    aboviSpectralUpperBound = nativeSettings.getABOVISpectralUpperBound();
-    aboviSpectralLowerBound = nativeSettings.getABOVISpectralLowerBound();
+    aboviPrintEstimatedError = nativeSettings.getABOVIPrintEstimatedError();
 }
 
 NativeSolverEnvironment::~NativeSolverEnvironment() {
@@ -96,28 +95,20 @@ void NativeSolverEnvironment::setSymmetricUpdates(bool value) {
     symmetricUpdates = value;
 }
 
-storm::RationalNumber const& NativeSolverEnvironment::getABOVIEffectiveTolerance() const {
+storm::RationalNumber NativeSolverEnvironment::getABOVIEffectiveTolerance() const {
     return aboviEffectiveTolerance;
 }
 
-void NativeSolverEnvironment::setABOVIEffectiveTolerance(storm::RationalNumber const& value) {
+void NativeSolverEnvironment::setABOVIEffectiveTolerance(storm::RationalNumber value) {
     aboviEffectiveTolerance = value;
 }
 
-storm::RationalNumber const& NativeSolverEnvironment::getABOVISpectralUpperBound() const {
-    return aboviSpectralUpperBound;
+bool NativeSolverEnvironment::getABOVIPrintEstimatedError() const {
+    return aboviPrintEstimatedError;
 }
 
-void NativeSolverEnvironment::setABOVISpectralUpperBound(storm::RationalNumber const& value) {
-    aboviSpectralUpperBound = value;
-}
-
-storm::RationalNumber const& NativeSolverEnvironment::getABOVISpectralLowerBound() const {
-    return aboviSpectralLowerBound;
-}
-
-void NativeSolverEnvironment::setABOVISpectralLowerBound(storm::RationalNumber const& value) {
-    aboviSpectralLowerBound = value;
+void NativeSolverEnvironment::setABOVIPrintEstimatedError(bool value) {
+    aboviPrintEstimatedError = value;
 }
 
 }  // namespace storm

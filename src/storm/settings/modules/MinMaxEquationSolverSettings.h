@@ -116,18 +116,9 @@ class MinMaxEquationSolverSettings : public ModuleSettings {
     double getABOVIEffectiveTolerance() const;
 
     /*!
-     * Retrieves the value of the spectral upper bound to be used for the adaptive Bayesian optimization value iteration method.
-     *
-     * @return The value of the spectral upper bound to be used.
+     * Retrieves whether the estimated error as computed by the adaptive Bayesian optimization value iteration method is printed.
      */
-    double getABOVISpectralUpperBound() const;
-
-    /*!
-     * Retrieves the value of the spectral lower bound to be used for the adaptive Bayesian optimization value iteration method.
-     *
-     * @return The value of the spectral lower bound to be used.
-     */
-    double getABOVISpectralLowerBound() const;
+    bool getABOVIPrintEstimatedError() const;
 
     // The name of the module.
     static const std::string moduleName;
