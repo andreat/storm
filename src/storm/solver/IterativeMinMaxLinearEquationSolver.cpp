@@ -841,6 +841,7 @@ bool IterativeMinMaxLinearEquationSolver<ValueType, SolutionType>::solveEquation
     std::vector<ValueType> previousR{std::vector<ValueType>(nstates, ZERO)};
     std::vector<ValueType> currentR{std::vector<ValueType>(nstates, ZERO)};
     ValueType norm_previousR{ZERO};
+    ValueType norm_currentEstimate(ONE);
 
     bool isFirst{true};
 
@@ -862,12 +863,9 @@ bool IterativeMinMaxLinearEquationSolver<ValueType, SolutionType>::solveEquation
             if (currentRho < ONE) {
                 storm::utility::vector::addVectors(currentR, ZERO_VECTOR, currentEstimate);
                 storm::utility::vector::scaleVectorInPlace(currentEstimate, ONE / (ONE - currentRho));
-                ValueType norm_currentEstimate{storm::utility::vector::maximumElementAbs(currentEstimate)};
+                norm_currentEstimate = storm::utility::vector::maximumElementAbs(currentEstimate);
                 if (norm_currentEstimate <= effectiveTolerance) {
                     status = SolverStatus::Converged;
-                    if (printEstimatedError) {
-                        std::cout << "Estimated error: " << norm_currentEstimate << "\n";
-                    }
                 }
             }
         }
@@ -912,6 +910,10 @@ bool IterativeMinMaxLinearEquationSolver<ValueType, SolutionType>::solveEquation
 
         if (!this->isCachingEnabled()) {
             clearCache();
+        }
+
+        if (printEstimatedError) {
+            std::cout << "Estimated error: " << norm_currentEstimate << "\n";
         }
 
         return status == SolverStatus::Converged || status == SolverStatus::TerminatedEarly;
