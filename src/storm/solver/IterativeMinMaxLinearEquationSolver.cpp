@@ -894,6 +894,10 @@ bool IterativeMinMaxLinearEquationSolver<ValueType, SolutionType>::solveEquation
             clearCache();
         }
 
+        if (printEstimatedError) {
+            std::cout << "Estimated error: " << norm_currentEstimate << "\n";
+        }
+
         return status == SolverStatus::Converged || status == SolverStatus::TerminatedEarly;
     } else {
         storm::solver::helper::ValueIterationHelper<ValueType, false, SolutionType> viHelper(viOperatorNontriv);
