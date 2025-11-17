@@ -838,8 +838,6 @@ bool IterativeMinMaxLinearEquationSolver<ValueType, SolutionType>::solveEquation
     const ValueType effectiveTolerance{storm::utility::convertNumber<ValueType>(env.solver().minMax().getABOVIEffectiveTolerance())};
     const bool printEstimatedError{env.solver().minMax().getABOVIPrintEstimatedError()};
     std::vector<ValueType> previousX{std::vector<ValueType>(nstates, ZERO)};
-    std::vector<ValueType> previousR{std::vector<ValueType>(nstates, ZERO)};
-    std::vector<ValueType> currentR{std::vector<ValueType>(nstates, ZERO)};
     ValueType norm_previousR{ZERO};
     ValueType norm_currentEstimate(ONE);
 
@@ -851,7 +849,7 @@ bool IterativeMinMaxLinearEquationSolver<ValueType, SolutionType>::solveEquation
         this->showProgressIterative(numIterations);
         SolverStatus status{current};
     
-        std::vector<ValueType> currentEstimate{std::vector<ValueType>(nstates, ZERO)};
+        std::vector<ValueType> currentR{std::vector<ValueType>(nstates, ZERO)};
         storm::utility::vector::subtractVectors(x, previousX, currentR);
         ValueType norm_currentR{storm::utility::vector::maximumElementAbs(currentR)};
         // we need at least two iterations to have actual data to work on
@@ -861,15 +859,13 @@ bool IterativeMinMaxLinearEquationSolver<ValueType, SolutionType>::solveEquation
         } else {
             ValueType currentRho{norm_currentR / norm_previousR};
             if (currentRho < ONE) {
-                storm::utility::vector::addVectors(currentR, ZERO_VECTOR, currentEstimate);
-                storm::utility::vector::scaleVectorInPlace(currentEstimate, ONE / (ONE - currentRho));
-                norm_currentEstimate = storm::utility::vector::maximumElementAbs(currentEstimate);
+                storm::utility::vector::scaleVectorInPlace(currentR, ONE / (ONE - currentRho));
+                norm_currentEstimate = storm::utility::vector::maximumElementAbs(currentR);
                 if (norm_currentEstimate <= effectiveTolerance) {
                     status = SolverStatus::Converged;
                 }
             }
         }
-        storm::utility::vector::addVectors(currentR, ZERO_VECTOR, previousR);
         storm::utility::vector::addVectors(x, ZERO_VECTOR, previousX);
         norm_previousR = norm_currentR;
         return this->updateStatus(status, false, numIterations, env.solver().minMax().getMaximalNumberOfIterations());
