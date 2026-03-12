@@ -822,10 +822,14 @@ bool IterativeMinMaxLinearEquationSolver<ValueType, SolutionType>::solveEquation
         }
         storm::Environment const& environmentOfSolver = environmentOfSolverStorage ? *environmentOfSolverStorage : env;
 
-        solveInducedEquationSystem(environmentOfSolver, linEqSolver, this->getInitialScheduler(), x, *auxiliaryRowGroupVector, b, dir);
-        // If we were given an initial scheduler and are maximizing (minimizing), our current solution becomes
-        // always less-or-equal (greater-or-equal) than the actual solution.
-        guarantee = maximize(dir) ? SolverGuarantee::LessOrEqual : SolverGuarantee::GreaterOrEqual;
+        bool success = solveInducedEquationSystem(environmentOfSolver, linEqSolver, this->getInitialScheduler(), x, *auxiliaryRowGroupVector, b, dir);
+        if (success) {
+            // If we were given an initial scheduler and are maximizing (minimizing), our current solution becomes
+            // always less-or-equal (greater-or-equal) than the actual solution.
+            guarantee = maximize(dir) ? SolverGuarantee::LessOrEqual : SolverGuarantee::GreaterOrEqual;
+        } else {
+            guarantee = SolverGuarantee::None;
+        }
     } else if (!this->hasUniqueSolution()) {
         if (maximize(dir)) {
             this->createLowerBoundsVector(x);
@@ -879,7 +883,7 @@ bool IterativeMinMaxLinearEquationSolver<ValueType, SolutionType>::solveEquation
         }
         storm::utility::vector::addVectors(x, ZERO_VECTOR, previousX);
         norm_previousR = norm_currentR;
-        return this->updateStatus(status, false, numIterations, env.solver().minMax().getMaximalNumberOfIterations());
+        return this->updateStatus(status, x, guarantee, numIterations, env.solver().minMax().getMaximalNumberOfIterations());
     };
 
     this->startMeasureProgress();
@@ -889,12 +893,12 @@ bool IterativeMinMaxLinearEquationSolver<ValueType, SolutionType>::solveEquation
 
         auto status = viHelper.VI(x, b, numIterations, env.solver().minMax().getRelativeTerminationCriterion(),
                                   storm::utility::convertNumber<SolutionType>(env.solver().minMax().getPrecision()), dir, viCallback,
-                                  env.solver().minMax().getMultiplicationStyle(), this->isUncertaintyRobust());
+                                  env.solver().minMax().getMultiplicationStyle(), this->getUncertaintyResolutionMode());
         this->reportStatus(status, numIterations);
 
         // If requested, we store the scheduler for retrieval.
         if (this->isTrackSchedulerSet()) {
-            this->extractScheduler(x, b, dir, this->isUncertaintyRobust());
+            this->extractScheduler(x, b, dir, this->getUncertaintyResolutionMode());
         }
 
         if (!this->isCachingEnabled()) {
@@ -911,12 +915,12 @@ bool IterativeMinMaxLinearEquationSolver<ValueType, SolutionType>::solveEquation
 
         auto status = viHelper.VI(x, b, numIterations, env.solver().minMax().getRelativeTerminationCriterion(),
                                   storm::utility::convertNumber<SolutionType>(env.solver().minMax().getPrecision()), dir, viCallback,
-                                  env.solver().minMax().getMultiplicationStyle(), this->isUncertaintyRobust());
+                                  env.solver().minMax().getMultiplicationStyle(), this->getUncertaintyResolutionMode());
         this->reportStatus(status, numIterations);
 
         // If requested, we store the scheduler for retrieval.
         if (this->isTrackSchedulerSet()) {
-            this->extractScheduler(x, b, dir, this->isUncertaintyRobust());
+            this->extractScheduler(x, b, dir, this->getUncertaintyResolutionMode());
         }
 
         if (!this->isCachingEnabled()) {
