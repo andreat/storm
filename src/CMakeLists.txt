@@ -31,6 +31,7 @@ endif()
 if (STORM_COMPILE_WITH_ADDRESS_SANITIZER)
     message(STATUS "Storm - Enabling AddressSanitizer")
     add_compile_options(-fsanitize=address)
+    add_link_options(-fsanitize=address)
 endif()
 
 # In release mode, we turn on even more optimizations if we do not have to provide a portable binary.
@@ -119,6 +120,11 @@ if (STORM_DEVELOPER)
     endif ()
 else()
     add_compile_options($<$<CONFIG:RELEASE>:-fomit-frame-pointer>)
+endif()
+
+if(STORM_WARNING_AS_ERROR)
+    # Reenable soon
+    add_compile_options(-Wno-unused-parameter)
 endif()
 
 

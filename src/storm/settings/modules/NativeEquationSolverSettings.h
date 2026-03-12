@@ -105,11 +105,6 @@ class NativeEquationSolverSettings : public ModuleSettings {
      */
     storm::solver::MultiplicationStyle getPowerMethodMultiplicationStyle() const;
 
-    /*!
-     * Retrieves whether the  force bounds option has been set.
-     */
-    bool isForceBoundsSet() const;
-
     bool check() const override;
 
     /*!
